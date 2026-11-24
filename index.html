@@ -1,0 +1,846 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NovaLearn | Learn Smarter</title>
+<style>
+:root {
+  --bg:#f5f7fc; --surface:#fff; --text:#17213a; --muted:#75809a;
+  --primary:#6558e8; --light:#eeecff; --border:#e8eaf2;
+  --green:#159b70; --orange:#ed9841; --red:#e35b68;
+}
+* { box-sizing:border-box; }
+body { margin:0; font-family:Inter,Arial,sans-serif; background:var(--bg); color:var(--text); }
+button,input,select { font:inherit; }
+button { cursor:pointer; }
+.app { display:flex; min-height:100vh; }
+.sidebar {
+  width:245px; background:#fff; border-right:1px solid var(--border);
+  padding:25px 17px; position:fixed; inset:0 auto 0 0; z-index:5;
+  display:flex; flex-direction:column;
+}
+.logo { font-size:25px; font-weight:850; letter-spacing:-1px; padding:5px 10px 28px; }
+.logo span { color:var(--primary); }
+.nav-label { font-size:10px; color:var(--muted); font-weight:800; letter-spacing:1.5px; padding:12px 12px 8px; }
+.nav-btn {
+  border:0; background:transparent; color:#69748d; padding:12px;
+  text-align:left; border-radius:10px; margin:2px 0; width:100%;
+  font-size:14px; font-weight:650;
+}
+.nav-btn:hover,.nav-btn.active { background:var(--light); color:var(--primary); }
+.sidebar-bottom { margin-top:auto; background:#f7f6ff; border-radius:14px; padding:15px; font-size:12px; color:var(--muted); line-height:1.6; }
+.main { margin-left:245px; width:calc(100% - 245px); padding:28px 4%; max-width:1600px; }
+.topbar { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-bottom:30px; }
+.topbar h1 { font-size:25px; margin:0; }
+.topbar p { margin:6px 0 0; color:var(--muted); font-size:13px; }
+.top-actions { display:flex; align-items:center; gap:10px; }
+select,.search {
+  border:1px solid var(--border); background:white; border-radius:10px;
+  padding:11px 13px; color:var(--text); outline:none;
+}
+.search { width:100%; max-width:340px; }
+select:focus,input:focus { border-color:var(--primary); }
+.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; margin-bottom:25px; }
+.stat,.panel,.subject-card,.topic-card,.lesson-card,.tip-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:16px;
+}
+.stat { padding:19px; }
+.stat-label { color:var(--muted); font-size:12px; }
+.stat-value { font-size:26px; font-weight:800; margin:9px 0 4px; }
+.stat-note { font-size:11px; color:var(--muted); }
+.section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:28px 0 15px; }
+.section-head h2 { font-size:18px; margin:0; }
+.section-head p { color:var(--muted); font-size:12px; margin:5px 0 0; }
+.subject-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:15px; }
+.subject-card { padding:19px; cursor:pointer; transition:.2s; }
+.subject-card:hover { transform:translateY(-3px); border-color:#b9b2ff; }
+.subject-icon { font-size:26px; margin-bottom:12px; }
+.subject-card h3 { margin:0 0 6px; font-size:16px; }
+.subject-card p { color:var(--muted); font-size:12px; margin:0 0 15px; }
+.progress-track { height:7px; border-radius:20px; background:#edf0f6; overflow:hidden; }
+.progress-fill { height:100%; background:var(--primary); border-radius:20px; }
+.progress-caption { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; margin-top:8px; }
+.panel { padding:22px; margin-bottom:18px; }
+.page { display:none; }
+.page.active { display:block; }
+.back { border:0; background:transparent; color:var(--primary); padding:0; font-weight:700; margin-bottom:18px; }
+.topic-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.topic-card { padding:16px; display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; }
+.topic-card:hover { border-color:#b9b2ff; }
+.topic-card h3 { font-size:14px; margin:0 0 5px; }
+.topic-card p { font-size:11px; color:var(--muted); margin:0; }
+.topic-number { width:32px; height:32px; flex-shrink:0; display:grid; place-items:center; background:var(--light); color:var(--primary); border-radius:10px; font-weight:800; }
+.tag { font-size:10px; padding:5px 8px; border-radius:20px; background:#e8f7f1; color:var(--green); white-space:nowrap; }
+.lesson-card { padding:22px; margin-bottom:15px; }
+.lesson-card h2 { font-size:20px; margin:0 0 13px; }
+.lesson-card h3 { font-size:15px; margin:20px 0 8px; }
+.lesson-card p,.lesson-card li { color:#56617a; line-height:1.75; font-size:14px; }
+.example { background:#f4f3ff; border-left:4px solid var(--primary); border-radius:8px; padding:15px; margin-top:12px; line-height:1.7; font-size:13px; }
+.tip { background:#fff8e9; border-left:4px solid var(--orange); padding:13px; border-radius:8px; font-size:13px; line-height:1.6; margin-top:12px; }
+.action { border:0; background:var(--primary); color:white; padding:11px 17px; border-radius:9px; font-weight:700; }
+.action:hover { filter:brightness(.94); }
+.secondary { border:1px solid var(--border); background:white; color:var(--text); padding:10px 15px; border-radius:9px; }
+.button-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+.quiz-question { font-size:18px; font-weight:750; line-height:1.5; margin:15px 0; }
+.answer {
+  display:block; width:100%; text-align:left; border:1px solid var(--border);
+  border-radius:10px; background:white; padding:13px; margin:9px 0;
+}
+.answer:hover { border-color:var(--primary); background:#f8f7ff; }
+.answer.correct { border-color:var(--green); background:#eaf8f2; }
+.answer.wrong { border-color:var(--red); background:#fff0f1; }
+.feedback { padding:13px; border-radius:9px; margin-top:12px; font-size:13px; line-height:1.6; }
+.feedback.good { background:#eaf8f2; color:#08744e; }
+.feedback.bad { background:#fff0f1; color:#a52d3c; }
+.hidden { display:none!important; }
+.tip-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+.tip-card { padding:18px; }
+.tip-card h3 { margin:0 0 9px; font-size:15px; }
+.tip-card p,.tip-card li { font-size:13px; color:#65708a; line-height:1.65; }
+.reward-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.reward { background:white; border:1px solid var(--border); border-radius:14px; padding:17px; }
+.reward h3 { font-size:14px; margin:8px 0; }
+.reward p { font-size:12px; color:var(--muted); }
+.small { font-size:12px; color:var(--muted); }
+.empty { padding:30px; text-align:center; color:var(--muted); }
+.mobile-menu { display:none; }
+@media(max-width:900px) {
+ .sidebar { width:205px; }
+ .main { margin-left:205px; width:calc(100% - 205px); }
+ .stat-grid { grid-template-columns:repeat(2,1fr); }
+ .subject-grid { grid-template-columns:repeat(2,1fr); }
+}
+@media(max-width:650px) {
+ .sidebar { display:none; }
+ .main { margin:0; width:100%; padding:20px 15px; }
+ .topbar { align-items:flex-start; flex-direction:column; }
+ .top-actions { width:100%; }
+ .top-actions select { flex:1; }
+ .subject-grid,.topic-list,.tip-grid,.reward-grid { grid-template-columns:1fr; }
+ .stat-grid { grid-template-columns:repeat(2,1fr); }
+}
+
+.chat-messages{display:flex;flex-direction:column;gap:12px;max-height:420px;overflow:auto;padding:12px;background:#fafaff;border:1px solid var(--border);border-radius:13px;margin:15px 0}
+.chat-bubble{padding:13px 15px;border-radius:13px;max-width:92%;font-size:13px;line-height:1.7;white-space:pre-wrap}
+.chat-bubble.assistant{background:white;border:1px solid var(--border);align-self:flex-start}
+.chat-bubble.user{background:var(--light);align-self:flex-end}
+.ai-compose{display:flex;gap:10px;align-items:stretch}.ai-compose textarea{flex:1;min-width:0;border:1px solid var(--border);border-radius:10px;padding:12px;font:inherit;resize:vertical}
+.button-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.button-row select{min-width:150px}
+.generated-question{padding:15px;border:1px solid var(--border);border-radius:12px;margin:12px 0;background:#fff}.generated-question label{display:block;padding:7px 0;font-size:13px;cursor:pointer}.generated-question button{margin-top:8px}
+.auth-screen{position:fixed;inset:0;background:rgba(20,25,48,.55);z-index:30;display:none;place-items:center;padding:18px}.auth-screen.show{display:grid}.auth-card{background:white;border-radius:18px;padding:26px;width:min(440px,100%);box-shadow:0 20px 70px #1113}.auth-card h2{margin:0 0 8px}.auth-card p{color:var(--muted);font-size:13px;line-height:1.6}.auth-card input,.auth-card select{width:100%;margin:7px 0 12px}.profile-pill{font-size:12px;color:var(--primary);font-weight:700}
+@media(max-width:650px){.ai-compose{flex-direction:column}.ai-compose .action{width:100%}}
+
+</style>
+</head>
+<body>
+<div class="auth-screen" id="authScreen"><div class="auth-card"><div class="logo" style="padding:0 0 14px">Nova<span>Learn</span>.</div><h2 id="authHeading">Welcome to NovaLearn</h2><p id="authIntro">Create your learning profile to personalise your dashboard.</p><form id="profileForm"><label class="small" for="profileName">Your name</label><input id="profileName" placeholder="Enter your name" required maxlength="60"><label class="small" for="profileEmail">Email address</label><input id="profileEmail" type="email" placeholder="you@example.com" required><label class="small" for="profileGrade">Grade</label><select id="profileGrade"><option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8" selected>Grade 8</option><option value="9">Grade 9</option></select><button class="action" style="width:100%;margin-top:8px" type="submit">Continue to NovaLearn</button></form><p><b>Account setup note:</b> This starter version saves a profile in this browser. It does not send email verification or password-reset emails yet; those require a configured authentication/email provider.</p><button class="back" id="skipProfile" type="button">Continue without a profile</button></div></div>
+<div class="app">
+<aside class="sidebar">
+  <div class="logo">Nova<span>Learn</span>.</div>
+  <div class="nav-label">LEARNING</div>
+  <button class="nav-btn active" data-page="dashboard">⌂ &nbsp; Dashboard</button>
+  <button class="nav-btn" data-page="learn">▤ &nbsp; Learn</button>
+  <button class="nav-btn" data-page="practice">✎ &nbsp; Practice Quiz</button>
+  <button class="nav-btn" data-page="tips">✦ &nbsp; Tips & Shortcuts</button>
+  <div class="nav-label">YOUR SPACE</div>
+  <button class="nav-btn" data-page="progress">▥ &nbsp; My Progress</button>
+  <button class="nav-btn" data-page="rewards">◇ &nbsp; Rewards Shop</button>
+  <button class="nav-btn" data-page="ai">◎ &nbsp; AI Tutor</button>
+  <div class="sidebar-bottom">
+    <b>Keep learning.</b><br>
+    Small steps every day lead to big improvements.
+  </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div>
+    <h1 id="pageTitle">Welcome to NovaLearn!</h1>
+    <p id="pageSubtitle">Your learning space. Learn at your own pace.</p>
+  </div>
+  <div class="top-actions">
+    <input class="search" id="globalSearch" placeholder="⌕ Search subjects or topics..." />
+    <span class="profile-pill" id="profileGreeting"></span><select id="gradeSelect">
+      <option value="6">Grade 6</option>
+      <option value="7">Grade 7</option>
+      <option value="8" selected>Grade 8</option>
+      <option value="9">Grade 9</option>
+    </select>
+  </div>
+</header>
+
+<section class="page active" id="dashboard">
+  <div class="stat-grid">
+    <div class="stat"><div class="stat-label">TOTAL XP</div><div class="stat-value" id="xpStat">0</div><div class="stat-note">Keep earning points</div></div>
+    <div class="stat"><div class="stat-label">COINS</div><div class="stat-value" id="coinStat">0</div><div class="stat-note">Spend them in the shop</div></div>
+    <div class="stat"><div class="stat-label">TOPICS COMPLETED</div><div class="stat-value" id="topicStat">0</div><div class="stat-note">Keep making progress</div></div>
+    <div class="stat"><div class="stat-label">DAY STREAK</div><div class="stat-value" id="streakStat">0 🔥</div><div class="stat-note">Learning consistently</div></div>
+  </div>
+  <div class="section-head"><div><h2>Your subjects</h2><p>Choose a subject to explore its topics.</p></div></div>
+  <div class="subject-grid" id="dashboardSubjects"></div>
+  <div class="section-head"><div><h2>Continue learning</h2><p>Pick up where you left off.</p></div></div>
+  <div class="panel" id="continuePanel"><p class="small">Choose a subject and start your first lesson.</p></div>
+</section>
+
+<section class="page" id="learn">
+  <div id="learnContent"></div>
+</section>
+
+<section class="page" id="lesson">
+  <div id="lessonContent"></div>
+</section>
+
+<section class="page" id="practice">
+  <div id="practiceContent">
+    <div class="panel">
+      <h2>Practice Quiz</h2>
+      <p class="small">Choose a subject and topic to test your understanding.</p>
+      <div class="button-row">
+        <select id="quizSubject"></select>
+        <select id="quizTopic"></select>
+        <button class="action" id="startQuiz">Start quiz</button>
+      </div>
+    </div>
+    <div id="quizArea"></div>
+  </div>
+</section>
+
+<section class="page" id="tips">
+  <div class="section-head"><div><h2>Tips & Shortcuts</h2><p>Useful methods, formulas and common mistakes.</p></div></div>
+  <div class="panel">
+    <select id="tipsSubject"></select>
+    <div class="tip-grid" id="tipsContent" style="margin-top:17px"></div>
+  </div>
+</section>
+
+<section class="page" id="progress">
+  <div class="section-head"><div><h2>Your progress</h2><p>Track your learning across all subjects.</p></div></div>
+  <div class="stat-grid">
+    <div class="stat"><div class="stat-label">XP EARNED</div><div class="stat-value" id="progressXP">0</div></div>
+    <div class="stat"><div class="stat-label">COINS EARNED</div><div class="stat-value" id="progressCoins">0</div></div>
+    <div class="stat"><div class="stat-label">COMPLETED TOPICS</div><div class="stat-value" id="progressTopics">0</div></div>
+    <div class="stat"><div class="stat-label">QUIZZES COMPLETED</div><div class="stat-value" id="progressQuizzes">0</div></div>
+  </div>
+  <div class="panel"><h2>Subject progress</h2><div id="progressSubjects"></div></div>
+</section>
+
+<section class="page" id="rewards">
+  <div class="section-head"><div><h2>Rewards shop</h2><p>Use your coins to unlock rewards.</p></div><b id="shopCoins">0 coins</b></div>
+  <div class="reward-grid" id="rewardGrid"></div>
+</section>
+
+<section class="page" id="ai">
+  <div class="panel">
+    <div class="section-head" style="margin-top:0"><div><h2>✧ Nova AI Tutor</h2><p>Ask questions, get worked examples and practise a topic.</p></div><span class="tag">AI powered</span></div>
+    <div class="button-row" style="margin:16px 0"><select id="aiSubject"></select><select id="aiTopic"></select></div>
+    <div id="chatMessages" class="chat-messages"><div class="chat-bubble assistant"><b>Nova:</b> Hi! Choose a subject and topic, then ask me anything. I can explain concepts step by step and create examples.</div></div>
+    <form id="aiForm" class="ai-compose"><textarea id="aiQuestion" rows="3" placeholder="Ask Nova to explain a concept, solve a practice problem, or show an example..."></textarea><button class="action" id="aiSend" type="submit">Send question</button></form>
+    <div class="small" id="aiStatus" aria-live="polite">Your question is sent securely through the NovaLearn backend.</div>
+  </div>
+  <div class="panel">
+    <h2>AI Practice Generator</h2><p class="small">Generate a fresh set of questions for your selected grade, subject and topic.</p>
+    <div class="button-row"><select id="genDifficulty"><option>Mixed</option><option>Easy</option><option>Medium</option><option>Challenging</option></select><button class="action" id="generateQuiz">Generate practice questions</button></div>
+    <div id="generatedQuiz" style="margin-top:18px"></div>
+  </div>
+</section>
+</main>
+</div>
+
+<script>
+// -------------------- TOPIC DATABASE --------------------
+const subjects = {
+ Mathematics:{icon:"📐",topics:[
+  ["Number systems","Integers, fractions, decimals and rational numbers."],
+  ["Factors and multiples","Prime numbers, HCF and LCM."],
+  ["Fractions and percentages","Equivalent fractions, percentages and conversions."],
+  ["Ratio and proportion","Comparing quantities and solving proportions."],
+  ["Algebraic expressions","Variables, coefficients and simplifying expressions."],
+  ["Linear equations","Solving equations with one unknown."],
+  ["Geometry","Angles, triangles, polygons and their properties."],
+  ["Mensuration","Perimeter, area and volume."],
+  ["Data handling","Mean, median, mode and interpreting graphs."],
+  ["Probability","Finding the likelihood of an event."]
+ ]},
+ Biology:{icon:"🧬",topics:[
+  ["Cells and cell structure","Organelles and their functions."],
+  ["Plant and animal tissues","How cells form specialised tissues."],
+  ["Nutrition","Nutrients, balanced diets and digestion."],
+  ["Respiration","How cells release energy."],
+  ["Transportation","Transport systems in plants and animals."],
+  ["Reproduction","Basic processes of reproduction in living organisms."],
+  ["Ecology","Ecosystems, food chains and food webs."],
+  ["Adaptation","How organisms survive in their environments."],
+  ["Human body systems","How major body systems work together."],
+  ["Genetics and inheritance","Traits, genes and inherited characteristics."]
+ ]},
+ Chemistry:{icon:"⚗️",topics:[
+  ["States of matter","Solids, liquids, gases and particle theory."],
+  ["Elements and compounds","Atoms, elements, molecules and compounds."],
+  ["Atomic structure","Protons, neutrons, electrons and atomic number."],
+  ["Periodic table","Groups, periods and patterns in elements."],
+  ["Chemical formulae","Writing and interpreting chemical formulae."],
+  ["Chemical bonding","Ionic, covalent and metallic bonding."],
+  ["Chemical reactions","Reactants, products and evidence of reactions."],
+  ["Acids and bases","The pH scale, indicators and neutralisation."],
+  ["Metals and non-metals","Properties and reactions of different elements."],
+  ["Separation techniques","Filtration, evaporation, distillation and chromatography."]
+ ]},
+ Physics:{icon:"⚡",topics:[
+  ["Measurement and units","Physical quantities, SI units and measuring instruments."],
+  ["Motion","Distance, displacement, speed and velocity."],
+  ["Forces","Types of forces and their effects."],
+  ["Newton's laws","The relationship between force and motion."],
+  ["Work, energy and power","Energy transfers and calculations."],
+  ["Heat and temperature","Thermal energy and heat transfer."],
+  ["Light","Reflection, refraction and lenses."],
+  ["Sound","Vibrations, frequency and sound waves."],
+  ["Electricity","Current, voltage, resistance and circuits."],
+  ["Magnetism","Magnetic fields, poles and electromagnets."]
+ ]},
+ English:{icon:"📖",topics:[
+  ["Parts of speech","Nouns, verbs, adjectives, adverbs and more."],
+  ["Sentence structure","Clauses, phrases and sentence types."],
+  ["Punctuation","Using commas, apostrophes and other punctuation."],
+  ["Tenses","Past, present and future forms."],
+  ["Active and passive voice","Changing the focus of a sentence."],
+  ["Figurative language","Similes, metaphors, personification and imagery."],
+  ["Reading comprehension","Finding meaning, evidence and inference."],
+  ["Poetry analysis","Exploring structure, language and themes."],
+  ["Creative writing","Building characters, settings and plots."],
+  ["Argumentative writing","Creating clear arguments supported by evidence."]
+ ]},
+ Geography:{icon:"🌍",topics:[
+  ["Maps and map skills","Scale, direction, symbols and grid references."],
+  ["Latitude and longitude","Locating places using coordinates."],
+  ["Weather and climate","Elements of weather and climate patterns."],
+  ["Rocks and the rock cycle","Igneous, sedimentary and metamorphic rocks."],
+  ["Plate tectonics","Earth's plates, earthquakes and volcanoes."],
+  ["Rivers and landforms","River processes and landform formation."],
+  ["Population","Population distribution, density and change."],
+  ["Urbanisation","Cities, migration and urban challenges."],
+  ["Natural resources","Resource use, conservation and sustainability."],
+  ["Climate change","Causes, impacts and possible responses."]
+ ]},
+ Python:{icon:"🐍",topics:[
+  ["Introduction to Python","Programs, syntax, comments and output."],
+  ["Variables and data types","Storing values using different data types."],
+  ["Input and output","Using input() and print()."],
+  ["Operators","Arithmetic, comparison and logical operators."],
+  ["Conditional statements","Using if, elif and else."],
+  ["Loops","Repeating instructions with for and while."],
+  ["Strings","Indexing, slicing and string methods."],
+  ["Lists and tuples","Storing and accessing collections of data."],
+  ["Functions","Creating reusable blocks of code."],
+  ["Error handling","Understanding and handling common errors."]
+ ]}
+};
+
+const gradeTopics = {
+  6:{
+    Mathematics:["Whole numbers","Factors and multiples","Fractions and decimals","Ratio basics","Introduction to algebra","Simple equations","Basic geometry","Perimeter and area","Reading data","Basic probability"],
+    Biology:["Living and non-living things","Plant and animal cells","Plant parts","Nutrition","Human digestion","Respiration basics","Habitats","Food chains","Adaptations","Health and hygiene"],
+    Chemistry:["Solids, liquids and gases","Changes of state","Materials and their properties","Elements and compounds","Introduction to atoms","Mixtures","Separating mixtures","Reversible changes","Irreversible changes","Acids and indicators"],
+    Physics:["Measurements","Distance and time","Speed basics","Types of forces","Gravity and friction","Simple machines","Light and shadows","Sound and vibrations","Magnets","Simple circuits"],
+    English:["Nouns and pronouns","Verbs and adjectives","Sentence types","Basic punctuation","Simple and continuous tenses","Paragraph writing","Similes and metaphors","Reading comprehension","Character description","Writing a story"],
+    Geography:["Continents and oceans","Map symbols and scale","Latitude and longitude","Weather elements","Climate zones","Mountains and plains","Rivers","Natural resources","Settlements","Environmental protection"],
+    Python:["What is Python?","Variables","Data types","Print and input","Arithmetic operators","If statements","For loops","While loops","Strings","Simple lists"]
+  },
+  7:{
+    Mathematics:["Integers","Prime factors, HCF and LCM","Fractions and percentages","Ratio and proportion","Algebraic expressions","Linear equations","Angles and triangles","Area and volume","Averages and graphs","Probability"],
+    Biology:["Cell structure","Specialised cells","Plant tissues","Nutrition and digestion","Respiration","Transport in plants","Reproduction in plants","Ecosystems","Food webs","Adaptations"],
+    Chemistry:["Particle model","Elements and compounds","Atomic structure","Periodic table basics","Chemical symbols","Mixtures and solutions","Physical and chemical changes","Acids and alkalis","Metals and non-metals","Separation methods"],
+    Physics:["Physical quantities","Speed and distance","Balanced and unbalanced forces","Friction and gravity","Pressure","Energy forms","Heat transfer","Reflection of light","Sound waves","Series circuits"],
+    English:["Parts of speech","Clauses and phrases","Punctuation rules","Past and present tenses","Active and passive voice","Figurative language","Inference","Poetry techniques","Descriptive writing","Persuasive writing"],
+    Geography:["Map scales and coordinates","Latitude and longitude","Weather and climate","Rock types","Weathering and erosion","River features","Population distribution","Settlement patterns","Natural resources","Sustainable development"],
+    Python:["Variables and types","Input and output","Type conversion","Arithmetic operators","Comparison operators","If and elif","For loops","While loops","String methods","List methods"]
+  },
+  8:{
+    Mathematics:["Rational numbers","Powers and roots","Percentages and compound change","Direct and inverse proportion","Algebraic expressions","Linear equations","Geometry and angle properties","Mensuration","Statistics","Probability"],
+    Biology:["Cell organelles","Plant and animal tissues","Photosynthesis","Human digestion","Aerobic and anaerobic respiration","Transport systems","Human reproduction","Ecosystems and energy flow","Natural selection and adaptation","Human body systems"],
+    Chemistry:["States of matter","Elements and compounds","Atomic structure","Periodic table","Chemical formulae","Ionic and covalent bonding","Chemical reactions","Acids, bases and salts","Reactivity of metals","Separation techniques"],
+    Physics:["Measurement and units","Speed and velocity","Force and acceleration","Newton's laws","Work and energy","Heat transfer","Reflection and refraction","Wave properties","Electric current and voltage","Resistance and circuits"],
+    English:["Parts of speech","Sentence structure","Advanced punctuation","Verb tenses","Active and passive voice","Figurative language","Comprehension and inference","Poetry analysis","Narrative writing","Argumentative writing"],
+    Geography:["Map skills and scale","Latitude and longitude","Weather and climate","Rock cycle","Plate tectonics","River processes","Population change","Urbanisation","Resource management","Climate change"],
+    Python:["Variables and data types","Input and output","Type conversion","Operators","Conditional statements","For and while loops","String slicing and methods","Lists and tuples","Functions","Exception handling"]
+  },
+  9:{
+    Mathematics:["Real number system","Indices and surds","Percentage change and interest","Ratio and variation","Factorisation and identities","Linear equations and inequalities","Coordinate geometry","Surface area and volume","Statistics and cumulative frequency","Probability"],
+    Biology:["Cell structure and microscopy","Cell division","Biological molecules","Enzymes and digestion","Photosynthesis","Respiration","Transport in organisms","Inheritance and genetics","Ecology and populations","Human coordination systems"],
+    Chemistry:["Atomic structure and isotopes","Electronic configuration","Periodic trends","Ionic bonding","Covalent bonding","Metallic bonding","Balancing equations","Acids and salts","Reactivity series","Electrolysis and separation"],
+    Physics:["Scalars and vectors","Motion graphs","Acceleration","Newton's laws","Momentum and energy","Specific heat capacity","Wave behaviour","Refraction and lenses","Electrical circuits","Electromagnetism"],
+    English:["Advanced grammar","Complex sentences","Punctuation and style","Tense consistency","Voice and tone","Language analysis","Inference and evaluation","Poetry comparison","Discursive writing","Speech and article writing"],
+    Geography:["Topographic maps","Geographical coordinates","Atmospheric circulation","Climate systems","Plate boundaries","River and coastal processes","Demographic transition","Urban growth","Global resource distribution","Climate change responses"],
+    Python:["Variables and data structures","Input validation","Operators and expressions","Nested conditionals","Nested loops","List comprehensions","Functions and parameters","Tuples and dictionaries","Modules and libraries","Exception handling"]
+  }
+};
+
+// -------------------- LESSON CONTENT --------------------
+const explanations = {
+ Mathematics:{
+  "Fractions and decimals":["A fraction represents part of a whole. Its numerator tells us how many parts we have, while its denominator tells us the total equal parts.","To add fractions, first find a common denominator. To multiply fractions, multiply the numerators and denominators."],
+  "Linear equations":["An equation states that two expressions are equal. A variable represents an unknown value.","To solve an equation, use inverse operations to isolate the variable. Whatever operation you perform on one side must also be performed on the other."],
+  "Ratio and proportion":["A ratio compares two or more quantities. Ratios can be simplified by dividing every part by the same common factor.","A proportion states that two ratios are equal. Cross multiplication can help solve missing values."],
+  "Algebraic expressions":["An algebraic expression contains numbers, variables and operations. A coefficient is the number multiplying a variable.","Like terms have the same variable raised to the same power. Only like terms can be combined."],
+  "Probability":["Probability measures how likely an event is. It ranges from 0 (impossible) to 1 (certain).","For equally likely outcomes, probability equals favourable outcomes divided by total possible outcomes."]
+ },
+ Biology:{
+  "Cell structure":["Cells are the basic structural and functional units of living organisms. Different cells have different structures for their functions.","The nucleus contains genetic material. The cell membrane controls what enters and leaves the cell. Cytoplasm is where many chemical reactions occur."],
+  "Cell organelles":["Organelles are specialised structures inside cells. Each has a particular role that helps the cell function.","Mitochondria release energy through aerobic respiration. Ribosomes are responsible for protein synthesis."],
+  "Photosynthesis":["Photosynthesis is the process by which green plants use light energy to make glucose from carbon dioxide and water.","The process takes place mainly in chloroplasts, which contain chlorophyll to absorb light energy."],
+  "Respiration":["Cellular respiration releases energy from glucose so that cells can carry out their activities.","Aerobic respiration uses oxygen and releases more energy than anaerobic respiration."]
+ },
+ Chemistry:{
+  "Atomic structure":["An atom contains a central nucleus surrounded by electrons. The nucleus contains positively charged protons and neutral neutrons.","The atomic number equals the number of protons. In a neutral atom, the number of electrons equals the number of protons."],
+  "Chemical bonding":["Atoms form bonds to achieve more stable electron arrangements. Ionic bonding involves electron transfer; covalent bonding involves sharing electrons.","Ionic compounds usually form giant lattices. Simple covalent molecules generally have lower melting and boiling points."]
+ },
+ Physics:{
+  "Motion":["Motion describes a change in an object's position over time. Speed tells us how much distance is travelled per unit of time.","Average speed = total distance ÷ total time. Always use consistent units when calculating."],
+  "Forces":["A force is a push or pull that can change an object's motion or shape. Forces are measured in newtons (N).","The resultant force is the overall force after combining all forces, taking direction into account."],
+  "Electricity":["Electric current is the rate of flow of electric charge. It is measured in amperes (A).","Voltage is the energy transferred per unit charge. Resistance measures how much a component opposes current."]
+ },
+ English:{
+  "Figurative language":["Figurative language uses words in a non-literal way to create meaning or effect.","A simile compares using 'like' or 'as'. A metaphor describes one thing as another. Personification gives human qualities to non-human things."],
+  "Active and passive voice":["In active voice, the subject performs the action. In passive voice, the subject receives the action.","Active: The student solved the problem. Passive: The problem was solved by the student."],
+  "Argumentative writing":["Argumentative writing presents a clear position supported by logical reasons and evidence.","A strong paragraph makes a point, supports it with evidence and explains how that evidence supports the argument."]
+ },
+ Geography:{
+  "Latitude and longitude":["Latitude measures distance north or south of the Equator. Longitude measures distance east or west of the Prime Meridian.","Latitude lines run east-west. Longitude lines run from pole to pole."],
+  "Plate tectonics":["Earth's outer shell is divided into large plates that move slowly over the mantle.","At convergent boundaries plates move towards each other; at divergent boundaries they move apart; at transform boundaries they slide past each other."],
+  "Climate change":["Climate change refers to long-term changes in average temperatures and weather patterns.","Human activities such as burning fossil fuels increase greenhouse gas concentrations, strengthening the greenhouse effect."]
+ },
+ Python:{
+  "Variables and data types":["A variable is a named reference used to store a value. Python creates a variable when you assign a value to it.","Common data types include int for whole numbers, float for decimal numbers, str for text and bool for True or False."],
+  "Conditional statements":["Conditional statements allow a program to make decisions based on whether a condition is True or False.","Use if for the first condition, elif for additional conditions and else for the remaining case."],
+  "Loops":["Loops repeat a block of code. A for loop is often used when iterating over a sequence or a known range.","A while loop repeats as long as its condition remains True. Make sure the condition can eventually become False."],
+  "Lists and tuples":["A list stores multiple items in an ordered, changeable collection. A tuple is ordered but cannot be changed after creation.","List indexing begins at zero. Use append() to add an item to the end of a list."]
+ }
+};
+
+const examples = {
+ Mathematics:"Example: Solve 3x + 5 = 20. Subtract 5 from both sides: 3x = 15. Divide by 3: x = 5. Check: 3(5) + 5 = 20.",
+ Biology:"Example: A plant kept in darkness for a long time cannot photosynthesise effectively because there is no light energy. This reduces glucose production.",
+ Chemistry:"Example: Sodium has electron arrangement 2,8,1. It can lose one outer electron to form Na⁺, achieving a more stable arrangement.",
+ Physics:"Example: A cyclist travels 120 metres in 20 seconds. Speed = distance ÷ time = 120 ÷ 20 = 6 m/s.",
+ English:"Example: 'The classroom was a zoo' is a metaphor. It compares the classroom to a zoo to suggest that it was noisy and chaotic.",
+ Geography:"Example: A location at 20°N, 75°E is 20 degrees north of the Equator and 75 degrees east of the Prime Meridian.",
+ Python:"Example: score = 85. The variable score stores the integer 85. You can display it using print(score)."
+};
+
+const tips = {
+ Mathematics:[
+  ["Calculation strategy","Write down the formula first, substitute values carefully, then calculate. Keep units in your final answer."],
+  ["Common mistake","Do not add denominators when adding fractions. Find a common denominator first."],
+  ["Revision shortcut","Practise one example of each question type, then attempt a mixed set without looking at the solutions."]
+ ],
+ Biology:[
+  ["Remember processes","Learn biological processes as a sequence of steps. Explain what happens and why it happens."],
+  ["Common mistake","Do not confuse an organ, a tissue and a cell. They are different levels of organisation."],
+  ["Exam technique","Use precise scientific vocabulary and connect each structure to its function."]
+ ],
+ Chemistry:[
+  ["Remembering the periodic table","Learn how groups and periods relate to electron arrangements."],
+  ["Common mistake","A compound is chemically bonded; a mixture is not chemically bonded."],
+  ["Exam technique","Balance chemical equations by changing coefficients, not the chemical formulae."]
+ ],
+ Physics:[
+  ["Formula strategy","Write the formula, rearrange it if needed, substitute values and include the correct unit."],
+  ["Common mistake","Distance and displacement are not the same. Speed and velocity are not the same either."],
+  ["Revision shortcut","Practise identifying which formula matches the information given in a question."]
+ ],
+ English:[
+  ["Improve analysis","Do not just identify a technique. Explain its effect and what it suggests to the reader."],
+  ["Common mistake","A quotation alone does not explain an idea. Always analyse the evidence."],
+  ["Writing strategy","Plan your introduction, main points and conclusion before writing a longer response."]
+ ],
+ Geography:[
+  ["Case study strategy","Remember the location, causes, impacts and responses for each case study."],
+  ["Common mistake","Weather describes short-term conditions; climate describes long-term patterns."],
+  ["Exam technique","Support geographical explanations with specific places, examples and data when available."]
+ ],
+ Python:[
+  ["Debugging","Read the error message carefully. Check spelling, brackets, indentation and variable names."],
+  ["Common mistake","Python is case-sensitive. 'Score' and 'score' are different variable names."],
+  ["Practice strategy","Predict the output of a program before running it. This improves your understanding of code."]
+ ]
+};
+
+// -------------------- QUIZ GENERATION --------------------
+function makeQuestions(subject,topic,grade) {
+ const g = Number(grade);
+ const bank = [];
+ const add=(q,opts,correct,why)=>bank.push({q,opts,correct,why});
+
+ if(subject==="Mathematics") {
+  const a=5+g, b=3+g;
+  add(`What is ${a} + ${b}?`,[String(a+b),String(a*b),String(a+b+2),String(a-b)],0,`${a} + ${b} = ${a+b}.`);
+  add(`Solve: x + ${a} = ${a+b+4}.`,[String(b+4),String(b),String(a+4),String(a+b)],0,`Subtract ${a} from both sides. x = ${b+4}.`);
+  add(`What is ${a} × ${b}?`,[String(a*b),String(a+b),String(a*b+1),String(a*b-2)],0,`${a} × ${b} = ${a*b}.`);
+  add(`What is 25% of ${a*4}?`,[String(a),String(a*2),String(a*4),String(a/2)],0,`25% is one quarter. ${a*4} ÷ 4 = ${a}.`);
+  add(`A rectangle has length ${a} cm and width ${b} cm. What is its area?`,[`${a*b} cm²`,`${2*(a+b)} cm²`,`${a+b} cm²`,`${a*b*2} cm²`],0,`Area = length × width = ${a*b} cm².`);
+  add(`What is the mean of ${a}, ${b} and ${a+b}?`,[String((2*a+2*b)/3),String(a+b),String(a*b),String(a+b+1)],0,`Mean = total ÷ number of values = ${2*a+2*b} ÷ 3 = ${(2*a+2*b)/3}.`);
+ } else if(subject==="Biology") {
+  add("Which structure controls most activities of a typical eukaryotic cell?",["Nucleus","Cell wall","Vacuole","Cytoplasm"],0,"The nucleus contains genetic material and helps control cell activities.");
+  add("Which organelle is the main site of aerobic respiration?",["Mitochondrion","Ribosome","Chloroplast","Cell membrane"],0,"Mitochondria are the main sites of aerobic respiration.");
+  add("What is the main purpose of photosynthesis?",["To make glucose using light energy","To absorb minerals from soil","To release energy from glucose","To produce proteins"],0,"Photosynthesis converts light energy into chemical energy stored in glucose.");
+  add("Which gas is taken in by plants for photosynthesis?",["Carbon dioxide","Oxygen","Nitrogen","Hydrogen"],0,"Plants take in carbon dioxide and use it with water to make glucose.");
+  add("What is a group of similar cells working together called?",["Tissue","Organ","Organ system","Organism"],0,"A tissue is a group of similar cells working together.");
+ } else if(subject==="Chemistry") {
+  add("Which particle has a positive electrical charge?",["Proton","Electron","Neutron","Atom"],0,"Protons have a positive charge.");
+  add("What is the atomic number of an element?",["Number of protons","Number of neutrons","Number of shells","Number of compounds"],0,"The atomic number is the number of protons in an atom's nucleus.");
+  add("Which method can separate an insoluble solid from a liquid?",["Filtration","Distillation","Chromatography","Crystallisation"],0,"Filtration traps the insoluble solid while the liquid passes through.");
+  add("What is formed when an acid reacts with a base?",["Salt and water","Oxygen and hydrogen","Only carbon dioxide","Metal and water"],0,"Neutralisation produces salt and water.");
+  add("Which type of bonding involves sharing electrons?",["Covalent","Ionic","Metallic","Magnetic"],0,"Covalent bonds form when atoms share pairs of electrons.");
+ } else if(subject==="Physics") {
+  add("A runner covers ${a*10} metres in 10 seconds. What is the average speed?".replace("${a*10}",String(a*10)),[`${a} m/s`,`${a*10} m/s`,`10 m/s`,`${a+10} m/s`],0,`Speed = distance ÷ time = ${a*10} ÷ 10 = ${a} m/s.`);
+  add("What is the SI unit of force?",["Newton","Joule","Watt","Pascal"],0,"Force is measured in newtons (N).");
+  add("Which energy store increases when an object is lifted?",["Gravitational potential","Chemical","Nuclear","Sound"],0,"Lifting an object increases its gravitational potential energy.");
+  add("What happens to current in a simple series circuit?",["It is the same at every point","It is used up by each component","It doubles after each bulb","It becomes zero after a resistor"],0,"In a series circuit, current is the same at every point.");
+  add("Which wave property is measured in hertz?",["Frequency","Wavelength","Amplitude","Speed"],0,"Frequency is the number of wave cycles per second, measured in hertz.");
+ } else if(subject==="English") {
+  add("Which sentence contains a metaphor?",["The classroom was a zoo.","She ran like the wind.","The wind whispered.","He is as brave as a lion."],0,"The classroom is directly described as a zoo, so this is a metaphor.");
+  add("Which word is an adjective in 'The bright light shone'?",["Bright","Light","Shone","The"],0,"Bright describes the noun light.");
+  add("What is the main purpose of a topic sentence?",["Introduce the main idea of a paragraph","Provide the conclusion","List every source","Replace the title"],0,"A topic sentence introduces the main point of a paragraph.");
+  add("Which is an example of personification?",["The trees danced in the wind.","The tree was tall.","The tree had green leaves.","The tree grew quickly."],0,"Dancing is a human action given to the trees.");
+  add("What should a strong argument include?",["A clear claim and supporting evidence","Only personal opinions","Unrelated examples","No explanation"],0,"A strong argument uses a clear position supported by reasons and evidence.");
+ } else if(subject==="Geography") {
+  add("What does latitude measure?",["Distance north or south of the Equator","Distance east or west of the Prime Meridian","Height above sea level","Distance from the nearest city"],0,"Latitude measures angular distance north or south of the Equator.");
+  add("Which process breaks rocks into smaller pieces without moving them?",["Weathering","Erosion","Deposition","Transportation"],0,"Weathering breaks down rock in place.");
+  add("What is the long-term average pattern of weather called?",["Climate","Weather","Season","Forecast"],0,"Climate describes long-term average weather conditions.");
+  add("Which plate boundary involves plates moving apart?",["Divergent","Convergent","Transform","Collision only"],0,"At divergent boundaries, tectonic plates move away from each other.");
+  add("What does population density measure?",["People per unit area","Births per year","Total land area","Number of cities"],0,"Population density is usually measured as people per square kilometre.");
+ } else {
+  add("Which Python function displays output?",["print()","input()","type()","range()"],0,"print() displays information in the output.");
+  add("Which data type stores whole numbers?",["int","str","float","bool"],0,"int represents integer values.");
+  add("What is the output of print(3 + 4 * 2)?",["11","14","10","9"],0,"Multiplication happens before addition: 3 + 8 = 11.");
+  add("Which keyword starts a conditional statement?",["if","for","def","return"],0,"The if keyword checks a condition.");
+  add("Which method adds an item to the end of a list?",["append()","remove()","sort()","clear()"],0,"append() adds one item to the end of a list.");
+ }
+ return bank;
+}
+
+const state = {
+ xp:0, coins:0, completed:[], quizzes:0, streak:0,
+ lastDay:"", rewards:[], lastTopic:null
+};
+const STORAGE="novalearn_v1";
+function loadState() {
+ try {
+  const saved=JSON.parse(localStorage.getItem(STORAGE)||"{}");
+  Object.assign(state,saved);
+ } catch(e) { console.warn("Saved progress could not be loaded."); }
+ if(!Array.isArray(state.completed)) state.completed=[];
+ if(!Array.isArray(state.rewards)) state.rewards=[];
+ const today=new Date().toDateString();
+ if(state.lastDay!==today) {
+  const yesterday=new Date(Date.now()-86400000).toDateString();
+  state.streak=state.lastDay===yesterday ? (state.streak||0) : 0;
+ }
+}
+function saveState(){localStorage.setItem(STORAGE,JSON.stringify(state));}
+loadState();
+
+let currentSubject="Mathematics",currentTopic="",currentPage="dashboard";
+let quizQuestions=[],quizIndex=0,quizScore=0,answered=false;
+const $=id=>document.getElementById(id);
+const key=(s,t)=>`${$("gradeSelect").value}|${s}|${t}`;
+function isDone(s,t){return state.completed.includes(key(s,t));}
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5);}
+
+function updateStats(){
+ $("xpStat").textContent=state.xp;
+ $("coinStat").textContent=state.coins;
+ $("topicStat").textContent=state.completed.length;
+ $("streakStat").textContent=state.streak+" 🔥";
+ $("progressXP").textContent=state.xp;
+ $("progressCoins").textContent=state.coins;
+ $("progressTopics").textContent=state.completed.length;
+ $("progressQuizzes").textContent=state.quizzes;
+ $("shopCoins").textContent=state.coins+" coins";
+}
+function subjectProgress(s){
+ const topics=gradeTopics[$("gradeSelect").value][s];
+ const count=topics.filter(t=>isDone(s,t)).length;
+ return {count,total:topics.length,percent:Math.round(count/topics.length*100)};
+}
+function renderDashboard(){
+ updateStats();
+ $("dashboardSubjects").innerHTML=Object.keys(subjects).map(s=>{
+  const p=subjectProgress(s);
+  return `<div class="subject-card" onclick="openSubject('${s}')">
+   <div class="subject-icon">${subjects[s].icon}</div>
+   <h3>${s}</h3><p>${gradeTopics[$("gradeSelect").value][s].length} topics available</p>
+   <div class="progress-track"><div class="progress-fill" style="width:${p.percent}%"></div></div>
+   <div class="progress-caption"><span>${p.count} completed</span><span>${p.percent}%</span></div>
+  </div>`;
+ }).join("");
+ if(state.lastTopic){
+  $("continuePanel").innerHTML=`<b>${state.lastTopic.subject}: ${state.lastTopic.topic}</b><p class="small">Continue your last lesson.</p><button class="action" onclick="openLesson('${state.lastTopic.subject}','${state.lastTopic.topic}')">Continue learning</button>`;
+ }
+}
+
+function showPage(page){
+ currentPage=page;
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ $(page).classList.add("active");
+ document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+ const names={dashboard:["Welcome to NovaLearn!","Your learning space. Learn at your own pace."],learn:["Explore subjects","Choose a subject and discover its topics."],lesson:["Your lesson","Understand the concept, then try a practice quiz."],practice:["Practice Quiz","Test what you know."],tips:["Tips & Shortcuts","Study smarter with useful learning strategies."],progress:["My Progress","See how far you have come."],rewards:["Rewards Shop","Use your coins to unlock rewards."],ai:["AI Tutor","Your AI learning assistant."]};
+ $("pageTitle").textContent=names[page][0];
+ $("pageSubtitle").textContent=names[page][1];
+ if(page==="dashboard")renderDashboard();
+ if(page==="progress")renderProgress();
+ if(page==="tips")renderTips();
+ if(page==="rewards")renderRewards();
+}
+document.querySelectorAll(".nav-btn").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+
+function openSubject(s){
+ currentSubject=s;
+ showPage("learn");
+ renderLearn();
+}
+function renderLearn(){
+ const topics=gradeTopics[$("gradeSelect").value][currentSubject];
+ $("learnContent").innerHTML=`
+  <button class="back" onclick="showPage('dashboard')">← Back to dashboard</button>
+  <div class="panel"><div style="font-size:35px">${subjects[currentSubject].icon}</div>
+  <h2>${currentSubject}</h2><p class="small">Grade ${$("gradeSelect").value} · ${topics.length} topics</p>
+  <div class="progress-track"><div class="progress-fill" style="width:${subjectProgress(currentSubject).percent}%"></div></div>
+  <p class="small">${subjectProgress(currentSubject).count} of ${topics.length} topics completed</p></div>
+  <div class="topic-list">${topics.map((t,i)=>`
+   <div class="topic-card" onclick="openLesson('${currentSubject}','${t.replace(/'/g,"\\'")}')">
+    <div class="topic-number">${i+1}</div>
+    <div style="flex:1"><h3>${t}</h3><p>${subjects[currentSubject].topics[i][1]}</p></div>
+    ${isDone(currentSubject,t)?'<span class="tag">Completed</span>':'<span class="small">Study →</span>'}
+   </div>`).join("")}</div>`;
+}
+
+function getExplanation(subject,topic){
+ const found=explanations[subject]?.[topic];
+ if(found) return found;
+ const desc=subjects[subject].topics[gradeTopics[$("gradeSelect").value][subject].indexOf(topic)]?.[1]||topic;
+ return [
+  `${topic} is an important part of ${subject}. ${desc} Understanding the key ideas helps you apply the topic to questions and real-world examples.`,
+  `Start by identifying the main terms and ideas in ${topic}. Then connect each idea to an example. Practise explaining the concept in your own words rather than only memorising a definition.`
+ ];
+}
+function openLesson(s,t){
+ currentSubject=s;currentTopic=t;
+ state.lastTopic={subject:s,topic:t};saveState();
+ showPage("lesson");
+ const explanation=getExplanation(s,t);
+ const example=examples[s];
+ $("lessonContent").innerHTML=`
+  <button class="back" onclick="openSubject('${s}')">← Back to ${s}</button>
+  <div class="lesson-card">
+   <p class="small">${s.toUpperCase()} · GRADE ${$("gradeSelect").value}</p>
+   <h2>${t}</h2>
+   <h3>1. Understanding the concept</h3>
+   <p>${explanation[0]}</p>
+   <p>${explanation[1]}</p>
+   <h3>2. Worked example</h3>
+   <div class="example">${example}</div>
+   <h3>3. Remember this</h3>
+   <div class="tip">${tips[s][0][1]}</div>
+   <div class="button-row">
+    <button class="action" onclick="completeTopic('${s}','${t.replace(/'/g,"\\'")}')">${isDone(s,t)?"Completed ✓":"Mark as completed +20 XP"}</button>
+    <button class="secondary" onclick="startTopicQuiz('${s}','${t.replace(/'/g,"\\'")}')">Practise this topic →</button>
+   </div>
+  </div>
+  <div class="lesson-card"><h3>Check your understanding</h3>
+   <p>Before moving on, try explaining this topic without looking at your notes. Can you give an example of your own?</p>
+  </div>`;
+}
+function completeTopic(s,t){
+ if(isDone(s,t))return;
+ state.completed.push(key(s,t));
+ state.xp+=20;state.coins+=10;
+ const today=new Date().toDateString();
+ if(state.lastDay!==today){state.streak=state.lastDay===new Date(Date.now()-86400000).toDateString()?state.streak+1:1;state.lastDay=today;}
+ saveState();updateStats();renderLearn();
+ openLesson(s,t);
+}
+function startTopicQuiz(s,t){
+ currentSubject=s;currentTopic=t;
+ showPage("practice");
+ $("quizSubject").value=s;updateQuizTopics();
+ $("quizTopic").value=t;
+ beginQuiz(s,t);
+}
+
+// -------------------- QUIZZES --------------------
+function fillQuizSelectors(){
+ $("quizSubject").innerHTML=Object.keys(subjects).map(s=>`<option>${s}</option>`).join("");
+ $("tipsSubject").innerHTML=Object.keys(subjects).map(s=>`<option>${s}</option>`).join("");
+ updateQuizTopics();
+}
+function updateQuizTopics(){
+ const s=$("quizSubject").value;
+ $("quizTopic").innerHTML=gradeTopics[$("gradeSelect").value][s].map(t=>`<option>${t}</option>`).join("");
+}
+$("quizSubject").addEventListener("change",updateQuizTopics);
+$("startQuiz").addEventListener("click",()=>beginQuiz($("quizSubject").value,$("quizTopic").value));
+
+function beginQuiz(s,t){
+ currentSubject=s;currentTopic=t;
+ quizQuestions=shuffle(makeQuestions(s,t,$("gradeSelect").value)).slice(0,5);
+ quizIndex=0;quizScore=0;answered=false;
+ renderQuestion();
+}
+function renderQuestion(){
+ const q=quizQuestions[quizIndex];
+ if(!q){finishQuiz();return;}
+ answered=false;
+ $("quizArea").innerHTML=`
+  <div class="panel">
+   <div class="small">QUESTION ${quizIndex+1} OF ${quizQuestions.length} · ${currentSubject}</div>
+   <div class="progress-track" style="margin-top:12px"><div class="progress-fill" style="width:${(quizIndex/quizQuestions.length)*100}%"></div></div>
+   <div class="quiz-question">${q.q}</div>
+   <div id="answerOptions">${shuffle(q.opts.map((v,i)=>({v,original:i}))).map(o=>`<button class="answer" data-answer="${o.original}">${o.v}</button>`).join("")}</div>
+   <div id="answerFeedback"></div>
+   <div class="button-row"><button class="action hidden" id="nextQuestion">${quizIndex===quizQuestions.length-1?"Finish quiz":"Next question →"}</button></div>
+  </div>`;
+ document.querySelectorAll(".answer").forEach(b=>b.addEventListener("click",()=>chooseAnswer(Number(b.dataset.answer),b)));
+ $("nextQuestion").addEventListener("click",()=>{quizIndex++;renderQuestion();});
+}
+function chooseAnswer(index,button){
+ if(answered)return;
+ answered=true;
+ const q=quizQuestions[quizIndex];
+ const correct=index===q.correct;
+ if(correct)quizScore++;
+ document.querySelectorAll(".answer").forEach(b=>{
+  const n=Number(b.dataset.answer);
+  if(n===q.correct)b.classList.add("correct");
+  else if(b===button)b.classList.add("wrong");
+ });
+ $("answerFeedback").innerHTML=`<div class="feedback ${correct?"good":"bad"}"><b>${correct?"Correct!":"Not quite."}</b><br>${q.why}</div>`;
+ $("nextQuestion").classList.remove("hidden");
+}
+function finishQuiz(){
+ state.quizzes++;
+ const earned=quizScore*10;
+ state.xp+=earned;state.coins+=Math.floor(earned/2);
+ saveState();updateStats();
+ $("quizArea").innerHTML=`
+  <div class="panel" style="text-align:center;padding:35px">
+   <div style="font-size:45px">🏆</div>
+   <h2>Quiz completed!</h2>
+   <div style="font-size:35px;font-weight:850;color:var(--primary)">${quizScore}/${quizQuestions.length}</div>
+   <p>You earned ${earned} XP and ${Math.floor(earned/2)} coins.</p>
+   <button class="action" onclick="beginQuiz('${currentSubject}','${currentTopic.replace(/'/g,"\\'")}')">Try again with new questions</button>
+   <button class="secondary" onclick="showPage('dashboard')">Dashboard</button>
+  </div>`;
+}
+
+// -------------------- TIPS --------------------
+function renderTips(){
+ const s=$("tipsSubject").value||"Mathematics";
+ $("tipsContent").innerHTML=tips[s].map((t,i)=>`
+  <div class="tip-card"><h3>${["✦","⚠","✓"][i]} ${t[0]}</h3><p>${t[1]}</p></div>`).join("");
+}
+$("tipsSubject").addEventListener("change",renderTips);
+
+// -------------------- PROGRESS --------------------
+function renderProgress(){
+ updateStats();
+ $("progressSubjects").innerHTML=Object.keys(subjects).map(s=>{
+  const p=subjectProgress(s);
+  return `<div style="margin:20px 0"><div class="progress-caption" style="font-size:13px;color:var(--text);margin-bottom:8px"><b>${subjects[s].icon} ${s}</b><span>${p.count}/${p.total} completed</span></div><div class="progress-track"><div class="progress-fill" style="width:${p.percent}%"></div></div></div>`;
+ }).join("");
+}
+
+// -------------------- REWARDS --------------------
+const rewards=[
+ ["🎨","Profile theme","Change your profile theme.",50],
+ ["⭐","XP boost badge","Unlock a learning badge.",100],
+ ["📚","Study champion","A reward for consistent learning.",150],
+ ["🏅","Nova achiever","Show off your progress.",250],
+ ["🚀","Super learner","A special milestone reward.",400],
+ ["👑","Nova legend","The highest shop reward.",600]
+];
+function renderRewards(){
+ $("shopCoins").textContent=state.coins+" coins";
+ $("rewardGrid").innerHTML=rewards.map((r,i)=>`
+  <div class="reward"><div style="font-size:30px">${r[0]}</div><h3>${r[1]}</h3><p>${r[2]}</p><b>${r[3]} coins</b><div style="margin-top:13px"><button class="action" ${state.rewards.includes(i)?"disabled":""} onclick="buyReward(${i})">${state.rewards.includes(i)?"Unlocked ✓":"Unlock"}</button></div></div>`).join("");
+}
+function buyReward(i){
+ if(state.rewards.includes(i))return;
+ if(state.coins<rewards[i][3]){alert("You need more coins to unlock this reward.");return;}
+ state.coins-=rewards[i][3];state.rewards.push(i);saveState();renderRewards();updateStats();
+}
+
+// -------------------- SEARCH --------------------
+$("globalSearch").addEventListener("input",e=>{
+ const value=e.target.value.trim().toLowerCase();
+ if(!value)return;
+ const found=Object.keys(subjects).find(s=>s.toLowerCase().includes(value)||
+  gradeTopics[$("gradeSelect").value][s].some(t=>t.toLowerCase().includes(value)));
+ if(found){
+  openSubject(found);
+  if(!found.toLowerCase().includes(value)){
+   const topics=gradeTopics[$("gradeSelect").value][found].filter(t=>t.toLowerCase().includes(value));
+   $("learnContent").querySelectorAll(".topic-card").forEach(card=>{
+    card.style.display=topics.some(t=>card.textContent.includes(t))?"flex":"none";
+   });
+  }
+ }
+});
+$("globalSearch").addEventListener("keydown",e=>{
+ if(e.key==="Escape"){e.target.value="";renderLearn();}
+});
+
+// -------------------- GRADE CHANGE --------------------
+$("gradeSelect").addEventListener("change",()=>{
+ renderDashboard();
+ if(currentPage==="learn")renderLearn();
+ if(currentPage==="lesson")openLesson(currentSubject,currentTopic);
+ if(currentPage==="progress")renderProgress();
+ if(currentPage==="practice")updateQuizTopics();
+});
+
+// -------------------- STARTUP --------------------
+fillQuizSelectors();
+renderDashboard();
+updateStats();
+
+// -------------------- PROFILE / SIGN-UP STARTER --------------------
+const PROFILE_KEY="novalearn_profile_v1";
+function loadProfile(){
+ try{const p=JSON.parse(localStorage.getItem(PROFILE_KEY)||"null");if(p){$("profileGreeting").textContent="Hi, "+p.name;$("gradeSelect").value=p.grade;$("profileName").value=p.name;$("profileEmail").value=p.email;$("profileGrade").value=p.grade;}else{$("authScreen").classList.add("show");}}catch(e){$("authScreen").classList.add("show");}
+}
+$("profileForm").addEventListener("submit",e=>{e.preventDefault();const p={name:$("profileName").value.trim(),email:$("profileEmail").value.trim(),grade:$("profileGrade").value};localStorage.setItem(PROFILE_KEY,JSON.stringify(p));$("gradeSelect").value=p.grade;$("profileGreeting").textContent="Hi, "+p.name;$("authScreen").classList.remove("show");renderDashboard();});
+$("skipProfile").addEventListener("click",()=>$("authScreen").classList.remove("show"));
+$("gradeSelect").addEventListener("change",()=>{const p=JSON.parse(localStorage.getItem(PROFILE_KEY)||"null");if(p){p.grade=$("gradeSelect").value;localStorage.setItem(PROFILE_KEY,JSON.stringify(p));$("profileGrade").value=p.grade;} });
+
+// -------------------- AI TUTOR --------------------
+function fillAISelectors(){
+ const opts=Object.keys(subjects).map(s=>`<option value="${s}">${s}</option>`).join("");
+ $("aiSubject").innerHTML=opts;
+ function topics(){const s=$("aiSubject").value;$("aiTopic").innerHTML=gradeTopics[$("gradeSelect").value][s].map(t=>`<option value="${t.replace(/"/g,"&quot;")}">${t}</option>`).join("");}
+ $("aiSubject").addEventListener("change",topics);$("gradeSelect").addEventListener("change",topics);topics();
+}
+function addChat(text,who){const el=document.createElement("div");el.className="chat-bubble "+who;el.textContent=(who==="assistant"?"Nova: ":"You: ")+text;$("chatMessages").appendChild(el);$("chatMessages").scrollTop=$("chatMessages").scrollHeight;}
+async function callNova(payload){const response=await fetch("/api/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const data=await response.json().catch(()=>({error:"The server returned an unreadable response."}));if(!response.ok)throw new Error(data.error||"AI request failed");return data.answer;}
+$("aiForm").addEventListener("submit",async e=>{e.preventDefault();const question=$("aiQuestion").value.trim();if(!question)return;const p=JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");const subject=$("aiSubject").value,topic=$("aiTopic").value;addChat(question,"user");$("aiQuestion").value="";$("aiSend").disabled=true;$("aiStatus").textContent="Nova is thinking...";try{const answer=await callNova({question,name:p.name||"Student",grade:$("gradeSelect").value,subject,topic});addChat(answer,"assistant");$("aiStatus").textContent="Answered by Nova AI.";}catch(err){addChat("I couldn't connect right now. "+err.message,"assistant");$("aiStatus").textContent="Check that the backend is running and your API key is configured.";}finally{$("aiSend").disabled=false;}});
+
+// -------------------- AI-GENERATED PRACTICE --------------------
+let generatedAnswers=[];
+$("generateQuiz").addEventListener("click",async()=>{
+ const p=JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");const subject=$("aiSubject").value,topic=$("aiTopic").value;
+ const btn=$("generateQuiz");btn.disabled=true;btn.textContent="Generating...";$("generatedQuiz").textContent="Creating questions...";
+ try{const r=await fetch("/api/generate-quiz",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({grade:$("gradeSelect").value,subject,topic,difficulty:$("genDifficulty").value})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Quiz generation failed");generatedAnswers=d.questions;renderGeneratedQuiz(d.questions);}
+ catch(err){$("generatedQuiz").textContent="Couldn't generate questions: "+err.message;}
+ finally{btn.disabled=false;btn.textContent="Generate practice questions";}
+});
+function renderGeneratedQuiz(questions){
+ $("generatedQuiz").innerHTML=questions.map((q,i)=>`<div class="generated-question" data-q="${i}"><b>${i+1}. ${escapeHTML(q.question)}</b>${q.options.map((o,j)=>`<label><input type="radio" name="gq${i}" value="${j}"> ${escapeHTML(o)}</label>`).join("")}<div class="small" id="gfeedback${i}"></div><button class="action secondary" type="button" onclick="checkGenerated(${i})">Check answer</button></div>`).join("");
+}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function checkGenerated(i){const selected=document.querySelector(`input[name="gq${i}"]:checked`);const f=$("gfeedback"+i);if(!selected){f.textContent="Choose an answer first.";return;}const q=generatedAnswers[i];f.textContent=Number(selected.value)===q.answerIndex?"Correct! "+q.explanation:"Not quite. "+q.explanation;}
+fillAISelectors();loadProfile();
+
+</script>
+</body>
+</html>
